@@ -1,0 +1,5 @@
+
+dependencies {
+    implementation group: 'io.reactivex.rxjava2', name: 'rxkotlin', version: '2.2.0'
+    implementation group: 'io.reactivex.rxjava2', name: 'rxandroid', version: '2.0.1'
+}
