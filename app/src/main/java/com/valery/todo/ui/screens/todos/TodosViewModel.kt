@@ -7,11 +7,10 @@ import com.valery.todo.ui.base.BaseViewModel
 import com.valery.todo.ui.screens.todos.item.BaseTodoItemViewModel
 import com.valery.todo.ui.screens.todos.item.SectionTodoItemViewModel
 import com.valery.todo.ui.screens.todos.item.TodoItemViewModel
-import com.valery.todo.utils.extensions.default
 import java.util.*
 
 class TodosViewModel : BaseViewModel() {
-    val itemsLiveData: MutableLiveData<MutableList<BaseTodoItemViewModel>> = MutableLiveData<MutableList<BaseTodoItemViewModel>>().default(mutableListOf())
+    val itemsLiveData: MutableLiveData<MutableList<BaseTodoItemViewModel>> = MutableLiveData()
 
     var sections: MutableList<SectionTodoItemViewModel> = mutableListOf()
     var itemViewModels: MutableList<TodoItemViewModel> = mutableListOf()

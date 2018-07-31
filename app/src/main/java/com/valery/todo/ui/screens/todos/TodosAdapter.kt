@@ -1,11 +1,12 @@
 package com.valery.todo.ui.screens.todos
 
+import android.animation.Animator
+import android.animation.AnimatorInflater
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.OvershootInterpolator
-import android.widget.CheckBox
 import android.widget.ImageView
 import android.widget.TextView
 import com.valery.todo.R
@@ -150,6 +151,14 @@ class TodosAdapter(todoCallback: TodoCallback?) : BaseAdapter<BaseViewHolder<out
         val ivExpandState = itemView.findViewById<ImageView>(R.id.ivExpandState)
         val tvTitle = itemView.findViewById<TextView>(R.id.tvTitle)
 
+        val openAnimator: Animator by lazy {
+            AnimatorInflater.loadAnimator(itemView.context, R.animator.animator_toogle_todo_open)
+        }
+
+        val closeAnimator: Animator by lazy {
+            AnimatorInflater.loadAnimator(itemView.context, R.animator.animator_toogle_todo_close)
+        }
+
         init {
             itemView.setOnClickListener {
                 (getItem(adapterPosition) as? SectionTodoItemViewModel)?.let {
@@ -168,8 +177,17 @@ class TodosAdapter(todoCallback: TodoCallback?) : BaseAdapter<BaseViewHolder<out
         }
 
         fun updateExpandState(expanded: Boolean) {
-            ivExpandState.animate().setInterpolator(OvershootInterpolator()).rotation(if (expanded) 225f else 0f).duration = 300
+            if (expanded) {
+                openAnimator.interpolator = OvershootInterpolator()
+                openAnimator.setTarget(ivExpandState)
+                openAnimator.start()
+            } else {
+                closeAnimator.interpolator = OvershootInterpolator()
+                closeAnimator.setTarget(ivExpandState)
+                closeAnimator.start()
+            }
         }
+
     }
 }
 
