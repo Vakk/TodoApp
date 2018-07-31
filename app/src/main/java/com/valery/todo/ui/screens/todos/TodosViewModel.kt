@@ -5,6 +5,7 @@ import com.valery.todo.model.db.Todo
 import com.valery.todo.model.db.TodoSection
 import com.valery.todo.ui.base.BaseViewModel
 import com.valery.todo.ui.screens.todos.item.BaseTodoItemViewModel
+import com.valery.todo.ui.screens.todos.item.EmptyItemViewModel
 import com.valery.todo.ui.screens.todos.item.SectionTodoItemViewModel
 import com.valery.todo.ui.screens.todos.item.TodoItemViewModel
 import java.util.*
@@ -34,7 +35,9 @@ class TodosViewModel : BaseViewModel() {
     }
 
     fun changeStatus(todoItemViewModel: TodoItemViewModel) {
-        itemViewModels.firstOrNull { it.id == todoItemViewModel.id }?.item?.isDone = !todoItemViewModel.item.isDone
+        itemViewModels.firstOrNull { it.id == todoItemViewModel.id }?.item?.apply {
+            isDone = !todoItemViewModel.item.isDone
+        }
         loadToView()
     }
 
@@ -57,7 +60,11 @@ class TodosViewModel : BaseViewModel() {
                         .map { it.copy(item = it.item.copy()) }
                         .sortedBy { it.id }
                         .sortedBy { it.item.isDone }
-                dataToView.addAll(todosForSection)
+                if (todosForSection.isNotEmpty()) {
+                    dataToView.addAll(todosForSection)
+                } else {
+                    dataToView.add(EmptyItemViewModel(section.id))
+                }
             }
         }
         itemsLiveData.postValue(dataToView)

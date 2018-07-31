@@ -3,12 +3,25 @@ package com.valery.todo.ui.screens.todos
 import android.os.Bundle
 import com.valery.todo.ui.base.BaseDiffUtillCallback
 import com.valery.todo.ui.screens.todos.item.BaseTodoItemViewModel
+import com.valery.todo.ui.screens.todos.item.EmptyItemViewModel
 import com.valery.todo.ui.screens.todos.item.SectionTodoItemViewModel
 import com.valery.todo.ui.screens.todos.item.TodoItemViewModel
 
 class TodoDifUtillCallback : BaseDiffUtillCallback<BaseTodoItemViewModel>(mutableListOf(), mutableListOf()) {
 
-    override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int) = oldItems[oldItemPosition].id == newItems[newItemPosition].id
+    override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+        val oldItem = oldItems[oldItemPosition]
+        val newItem = newItems[newItemPosition]
+
+        return when {
+            newItem !is EmptyItemViewModel && oldItem !is EmptyItemViewModel -> {
+                newItem.id == oldItem.id
+            }
+            else -> {
+                newItem is EmptyItemViewModel && oldItem is EmptyItemViewModel && newItem.id == oldItem.id
+            }
+        }
+    }
 
     override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
         val oldItem = oldItems[oldItemPosition]

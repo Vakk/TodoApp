@@ -27,9 +27,13 @@ class TodosAdapter(todoCallback: TodoCallback?) : BaseAdapter<BaseViewHolder<out
                 val view = LayoutInflater.from(parent.context).inflate(R.layout.item_todo, parent, false)
                 return TodoViewHolder(view)
             }
-            else -> {
+            TodoItemType.SECTION.value -> {
                 val view = LayoutInflater.from(parent.context).inflate(R.layout.item_todo_section, parent, false)
                 return SectionViewHolder(view)
+            }
+            else -> {
+                val view = LayoutInflater.from(parent.context).inflate(R.layout.item_todo_section_empty, parent, false)
+                return EmptySectionViewHolder(view)
             }
         }
     }
@@ -41,6 +45,9 @@ class TodosAdapter(todoCallback: TodoCallback?) : BaseAdapter<BaseViewHolder<out
             }
             is SectionViewHolder -> {
                 onBindViewHolder(holder, position)
+            }
+            is EmptySectionViewHolder -> {
+
             }
         }
     }
@@ -55,6 +62,9 @@ class TodosAdapter(todoCallback: TodoCallback?) : BaseAdapter<BaseViewHolder<out
                     is SectionViewHolder -> {
                         onBindViewHolder(holder, position, payloads)
                     }
+                    else -> {
+
+                    }
                 }
             }
         } else {
@@ -66,7 +76,7 @@ class TodosAdapter(todoCallback: TodoCallback?) : BaseAdapter<BaseViewHolder<out
         return when (getItem(position)) {
             is TodoItemViewModel -> TodoItemType.ITEM
             is SectionTodoItemViewModel -> TodoItemType.SECTION
-            else -> TodoItemType.SECTION
+            else -> TodoItemType.EMPTY_ITEM
         }.value
     }
 
@@ -189,8 +199,10 @@ class TodosAdapter(todoCallback: TodoCallback?) : BaseAdapter<BaseViewHolder<out
         }
 
     }
+
+    inner class EmptySectionViewHolder(itemView: View) : BaseViewHolder<SectionTodoItemViewModel>(itemView)
 }
 
 private enum class TodoItemType(val value: Int) {
-    SECTION(0), ITEM(1);
+    SECTION(0), ITEM(1), EMPTY_ITEM(2);
 }
