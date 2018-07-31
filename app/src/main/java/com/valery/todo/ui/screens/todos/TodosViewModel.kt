@@ -2,66 +2,60 @@ package com.valery.todo.ui.screens.todos
 
 import android.arch.lifecycle.MutableLiveData
 import com.valery.todo.ui.base.BaseViewModel
+import com.valery.todo.ui.screens.todos.item.BaseTodoItem
+import com.valery.todo.ui.screens.todos.item.SectionTodoItem
+import com.valery.todo.ui.screens.todos.item.TodoItem
 import com.valery.todo.utils.extensions.default
-import io.reactivex.Observable
-import java.util.*
-import java.util.concurrent.TimeUnit
 
 class TodosViewModel : BaseViewModel() {
-    val itemsLiveData: MutableLiveData<MutableList<TodoItemViewModel>> = MutableLiveData<MutableList<TodoItemViewModel>>().default(mutableListOf())
+    val itemsLiveData: MutableLiveData<MutableList<BaseTodoItem>> = MutableLiveData<MutableList<BaseTodoItem>>().default(mutableListOf())
+
+    var sections: MutableList<SectionTodoItem> = mutableListOf()
+    var items: MutableList<TodoItem> = mutableListOf()
+
     private var lastValue: Int = 0
 
     init {
-        Observable.interval(10000, 1000, TimeUnit.MILLISECONDS)
-                .subscribe{
-                    synchronized(itemsLiveData) {
-                        itemsLiveData.value?.let { items ->
-                            val size = items.size
-                            if (size >= 0) {
-                                val random = Random()
-                                if (random.nextBoolean()) {
-                                    replaceRandomItems(random, items, size)
-                                } else {
-                                    removeRandomItem(random, items, size)
-                                }
-                            }
-                        }
-                    }
-                }
+        sections.add(SectionTodoItem(lastValue++.toLong(), "Done", true) { it.isDone })
+        sections.add(SectionTodoItem(lastValue++.toLong(), "Undone", true) { !it.isDone })
     }
 
     fun addValue(checked: Boolean, title: String) {
-        itemsLiveData.postValue(itemsLiveData.value?.apply { add(TodoItemViewModel(lastValue++.toLong(), checked, title)) })
+        items.add(TodoItem(lastValue++.toLong(), checked, title))
+        loadToView()
     }
 
-    fun removeValue(todoItemViewModel: TodoItemViewModel) {
-        itemsLiveData.postValue(itemsLiveData.value?.apply { remove(todoItemViewModel) })
+    fun removeValue(todoItem: TodoItem) {
+        items.remove(todoItem)
+        loadToView()
+    }
+
+    fun changeStatus(todoItem: TodoItem) {
+        todoItem.isDone = !todoItem.isDone
+        loadToView()
     }
 
     fun addValue() {
         addValue(true, "Check box #$lastValue")
     }
 
-    private fun replaceRandomItems (random: Random, items: MutableList<TodoItemViewModel>, size: Int) {
-        if (size == 0) {
-            return
-        }
-        val firstPosition = random.nextInt(size)
-        val secondPosition = random.nextInt(size)
-        if (firstPosition != secondPosition) {
-            val firstValue = items[firstPosition]
-            val secondValue = items[secondPosition]
-            items[firstPosition] = secondValue
-            items[secondPosition] = firstValue
-            itemsLiveData.postValue(items)
-        }
+    fun expandSection(section: SectionTodoItem) {
+        sections.firstOrNull { it.id == section.id }?.isExpanded = !section.isExpanded
+        loadToView()
     }
 
-    private fun removeRandomItem (random: Random, items: MutableList<TodoItemViewModel>, size: Int) {
-        if (size == 0) {
-            return
+    private fun loadToView() {
+        val dataToView = mutableListOf<BaseTodoItem>()
+        for (section in sections) {
+            dataToView.add(section.copy())
+            if (section.isExpanded) {
+                for (todo in items) {
+                    if (section.validator.invoke(todo)) {
+                        dataToView.add(todo)
+                    }
+                }
+            }
         }
-        items.removeAt(random.nextInt(size))
-        itemsLiveData.postValue(items)
+        itemsLiveData.postValue(dataToView)
     }
 }

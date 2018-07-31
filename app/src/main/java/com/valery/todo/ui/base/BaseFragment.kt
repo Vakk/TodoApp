@@ -14,7 +14,7 @@ abstract class BaseFragment<ViewModel: BaseViewModel>(private val viewModelClass
     var viewModel: ViewModel? = null
     get() {
         if (field == null) {
-            Log.d(TAG, "View model for type $viewModelClass is null...")
+            Log.d(TAG, "View model for value $viewModelClass is null...")
         }
         return field
     }
