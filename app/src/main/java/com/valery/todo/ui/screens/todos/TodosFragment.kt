@@ -7,8 +7,8 @@ import android.support.v7.widget.LinearLayoutManager
 import android.view.View
 import com.valery.todo.R
 import com.valery.todo.ui.base.BaseFragment
-import com.valery.todo.ui.screens.todos.item.SectionTodoItem
-import com.valery.todo.ui.screens.todos.item.TodoItem
+import com.valery.todo.ui.screens.todos.item.SectionTodoItemViewModel
+import com.valery.todo.ui.screens.todos.item.TodoItemViewModel
 import kotlinx.android.synthetic.main.fragment_todos.*
 
 class TodosFragment : BaseFragment<TodosViewModel>(TodosViewModel::class.java), TodoCallback {
@@ -30,15 +30,15 @@ class TodosFragment : BaseFragment<TodosViewModel>(TodosViewModel::class.java), 
         }
     }
 
-    override fun setDone(todoItem: TodoItem) {
-        viewModel?.changeStatus(todoItem)
+    override fun setDone(todoItemViewModel: TodoItemViewModel) {
+        viewModel?.changeStatus(todoItemViewModel)
     }
 
     override fun liveData(): List<MutableLiveData<*>> {
         return listOfNotNull(viewModel?.itemsLiveData)
     }
 
-    override fun switchExpandState(section: SectionTodoItem) {
+    override fun switchExpandState(section: SectionTodoItemViewModel) {
         viewModel?.expandSection(section)
     }
 
@@ -46,6 +46,5 @@ class TodosFragment : BaseFragment<TodosViewModel>(TodosViewModel::class.java), 
         adapter = TodosAdapter(this)
         rvTodos.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
         rvTodos.adapter = adapter
-
     }
 }

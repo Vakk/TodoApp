@@ -1,10 +1,10 @@
 package com.valery.todo.ui.screens.todos
 
-import com.valery.todo.ui.screens.todos.item.SectionTodoItem
-import com.valery.todo.ui.screens.todos.item.TodoItem
+import com.valery.todo.ui.screens.todos.item.SectionTodoItemViewModel
+import com.valery.todo.ui.screens.todos.item.TodoItemViewModel
 
 interface TodoCallback {
-    fun setDone (todoItem: TodoItem)
+    fun setDone (todoItemViewModel: TodoItemViewModel)
 
-    fun switchExpandState (section: SectionTodoItem)
+    fun switchExpandState (section: SectionTodoItemViewModel)
 }

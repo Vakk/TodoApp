@@ -2,11 +2,11 @@ package com.valery.todo.ui.screens.todos
 
 import android.os.Bundle
 import com.valery.todo.ui.base.BaseDiffUtillCallback
-import com.valery.todo.ui.screens.todos.item.BaseTodoItem
-import com.valery.todo.ui.screens.todos.item.SectionTodoItem
-import com.valery.todo.ui.screens.todos.item.TodoItem
+import com.valery.todo.ui.screens.todos.item.BaseTodoItemViewModel
+import com.valery.todo.ui.screens.todos.item.SectionTodoItemViewModel
+import com.valery.todo.ui.screens.todos.item.TodoItemViewModel
 
-class TodoDifUtillCallback : BaseDiffUtillCallback<BaseTodoItem>(mutableListOf(), mutableListOf()) {
+class TodoDifUtillCallback : BaseDiffUtillCallback<BaseTodoItemViewModel>(mutableListOf(), mutableListOf()) {
 
     override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int) = oldItems[oldItemPosition].id == newItems[newItemPosition].id
 
@@ -15,11 +15,11 @@ class TodoDifUtillCallback : BaseDiffUtillCallback<BaseTodoItem>(mutableListOf()
         val newItem = newItems[newItemPosition]
 
         return when {
-            oldItem is TodoItem && newItem is TodoItem -> {
-                return oldItem.isDone != newItem.isDone && oldItem.title != newItem.title
+            oldItem is TodoItemViewModel && newItem is TodoItemViewModel -> {
+                return oldItem.item.isDone != newItem.item.isDone && oldItem.item.title != newItem.item.title
             }
-            oldItem is SectionTodoItem && newItem is SectionTodoItem -> {
-                return oldItem.isExpanded != newItem.isExpanded && oldItem.title != newItem.title
+            oldItem is SectionTodoItemViewModel && newItem is SectionTodoItemViewModel -> {
+                return oldItem.isExpanded != newItem.isExpanded && oldItem.section.title != newItem.section.title
             }
             else -> false
         }
@@ -30,22 +30,22 @@ class TodoDifUtillCallback : BaseDiffUtillCallback<BaseTodoItem>(mutableListOf()
         val newItem = newItems[newItemPosition]
 
         when {
-            oldItem is TodoItem && newItem is TodoItem -> {
-                if (oldItem.isDone != newItem.isDone) {
-                    putBoolean(TodoAdapterContract.EXTRA_IS_DONE, newItem.isDone)
+            oldItem is TodoItemViewModel && newItem is TodoItemViewModel -> {
+                if (oldItem.item.isDone != newItem.item.isDone) {
+                    putBoolean(TodoAdapterContract.EXTRA_IS_DONE, newItem.item.isDone)
                 }
 
-                if (oldItem.title != newItem.title) {
-                    putString(TodoAdapterContract.EXTRA_TITLE, newItem.title)
+                if (oldItem.item.title != newItem.item.title) {
+                    putString(TodoAdapterContract.EXTRA_TITLE, newItem.item.title)
                 }
             }
-            oldItem is SectionTodoItem && newItem is SectionTodoItem -> {
+            oldItem is SectionTodoItemViewModel && newItem is SectionTodoItemViewModel -> {
                 if (oldItem.isExpanded != newItem.isExpanded) {
                     putBoolean(TodoAdapterContract.EXTRA_EXPANDED, newItem.isExpanded)
                 }
 
-                if (oldItem.title != newItem.title) {
-                    putString(TodoAdapterContract.EXTRA_TITLE, newItem.title)
+                if (oldItem.section.title != newItem.section.title) {
+                    putString(TodoAdapterContract.EXTRA_TITLE, newItem.section.title)
                 }
             }
         }

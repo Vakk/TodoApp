@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.BounceInterpolator
 import android.view.animation.OvershootInterpolator
 import android.widget.CheckBox
 import android.widget.ImageView
@@ -12,16 +11,16 @@ import android.widget.TextView
 import com.valery.todo.R
 import com.valery.todo.ui.base.BaseAdapter
 import com.valery.todo.ui.base.BaseViewHolder
-import com.valery.todo.ui.screens.todos.item.BaseTodoItem
-import com.valery.todo.ui.screens.todos.item.SectionTodoItem
-import com.valery.todo.ui.screens.todos.item.TodoItem
+import com.valery.todo.ui.screens.todos.item.BaseTodoItemViewModel
+import com.valery.todo.ui.screens.todos.item.SectionTodoItemViewModel
+import com.valery.todo.ui.screens.todos.item.TodoItemViewModel
 import java.lang.ref.WeakReference
 
-class TodosAdapter(todoCallback: TodoCallback?) : BaseAdapter<BaseViewHolder<out BaseTodoItem>, BaseTodoItem>() {
+class TodosAdapter(todoCallback: TodoCallback?) : BaseAdapter<BaseViewHolder<out BaseTodoItemViewModel>, BaseTodoItemViewModel>() {
 
     protected var todoCallback = WeakReference(todoCallback)
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder<out BaseTodoItem> {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder<out BaseTodoItemViewModel> {
         when (viewType) {
             TodoItemType.ITEM.value -> {
                 val view = LayoutInflater.from(parent.context).inflate(R.layout.item_todo, parent, false)
@@ -34,7 +33,7 @@ class TodosAdapter(todoCallback: TodoCallback?) : BaseAdapter<BaseViewHolder<out
         }
     }
 
-    override fun onBindViewHolder(holder: BaseViewHolder<out BaseTodoItem>, position: Int) {
+    override fun onBindViewHolder(holder: BaseViewHolder<out BaseTodoItemViewModel>, position: Int) {
         when (holder) {
             is TodoViewHolder -> {
                 onBindViewHolder(holder, position)
@@ -45,7 +44,7 @@ class TodosAdapter(todoCallback: TodoCallback?) : BaseAdapter<BaseViewHolder<out
         }
     }
 
-    override fun onBindViewHolder(holder: BaseViewHolder<out BaseTodoItem>, position: Int, payloads: MutableList<Any>) {
+    override fun onBindViewHolder(holder: BaseViewHolder<out BaseTodoItemViewModel>, position: Int, payloads: MutableList<Any>) {
         if (payloads.isNotEmpty()) {
             (payloads[0] as? Bundle)?.apply {
                 when (holder) {
@@ -64,31 +63,31 @@ class TodosAdapter(todoCallback: TodoCallback?) : BaseAdapter<BaseViewHolder<out
 
     override fun getItemViewType(position: Int): Int {
         return when (getItem(position)) {
-            is TodoItem -> TodoItemType.ITEM
-            is SectionTodoItem -> TodoItemType.SECTION
+            is TodoItemViewModel -> TodoItemType.ITEM
+            is SectionTodoItemViewModel -> TodoItemType.SECTION
             else -> TodoItemType.SECTION
         }.value
     }
 
     private fun onBindViewHolder(holder: TodoViewHolder, position: Int) {
-        val item = getItem(position) as TodoItem
+        val item = getItem(position) as TodoItemViewModel
         holder.bind(item)
     }
 
     private fun onBindViewHolder(holder: SectionViewHolder, position: Int) {
-        val item = getItem(position) as SectionTodoItem
+        val item = getItem(position) as SectionTodoItemViewModel
         holder.bind(item)
     }
 
     private fun onBindViewHolder(holder: TodoViewHolder, position: Int, payloads: MutableList<Any>) {
         if (payloads.isNotEmpty()) {
             (payloads[0] as? Bundle)?.apply {
-                val item = getItem(position) as TodoItem
+                val item = getItem(position) as TodoItemViewModel
                 if (containsKey(TodoAdapterContract.EXTRA_TITLE)) {
-                    holder.updateTitle(item.title)
+                    holder.updateTitle(item.item.title)
                 }
                 if (containsKey(TodoAdapterContract.EXTRA_IS_DONE)) {
-                    holder.updateCheckBox(item.isDone)
+                    holder.updateDoneStatus(item.item.isDone)
                 }
                 return
             }
@@ -98,9 +97,9 @@ class TodosAdapter(todoCallback: TodoCallback?) : BaseAdapter<BaseViewHolder<out
     private fun onBindViewHolder(holder: SectionViewHolder, position: Int, payloads: MutableList<Any>) {
         if (payloads.isNotEmpty()) {
             (payloads[0] as? Bundle)?.apply {
-                val item = getItem(position) as SectionTodoItem
+                val item = getItem(position) as SectionTodoItemViewModel
                 if (containsKey(TodoAdapterContract.EXTRA_TITLE)) {
-                    holder.updateTitle(item.title)
+                    holder.updateTitle(item.section.title)
                 }
                 if (containsKey(TodoAdapterContract.EXTRA_EXPANDED)) {
                     holder.updateExpandState(item.isExpanded)
@@ -110,53 +109,57 @@ class TodosAdapter(todoCallback: TodoCallback?) : BaseAdapter<BaseViewHolder<out
         }
     }
 
-    inner class TodoViewHolder(itemView: View) : BaseViewHolder<TodoItem>(itemView) {
-        val cbChecked = itemView.findViewById<CheckBox>(R.id.cbChecked)
+    inner class TodoViewHolder(itemView: View) : BaseViewHolder<TodoItemViewModel>(itemView) {
         val tvTitle = itemView.findViewById<TextView>(R.id.tvTitle)
+        val vItemDone = itemView.findViewById<View>(R.id.vItemDone)
 
-        fun bind(item: TodoItem) {
-            cbChecked.setOnCheckedChangeListener(null)
-            cbChecked.isChecked = item.isDone
+        fun bind(itemViewModel: TodoItemViewModel) {
             prepareCheckListener()
 
-            tvTitle.text = item.title
+            tvTitle.text = itemViewModel.item.title
+
+            if (itemViewModel.item.isDone) {
+                vItemDone.visibility = View.VISIBLE
+            } else {
+                vItemDone.visibility = View.GONE
+            }
         }
 
         fun updateTitle(title: String) {
             tvTitle.text = title
         }
 
-        fun updateCheckBox(checked: Boolean) {
-            cbChecked.setOnCheckedChangeListener(null)
-            cbChecked.isChecked = checked
-            prepareCheckListener()
+        fun updateDoneStatus(isDone: Boolean) {
+            if (isDone) {
+                vItemDone.visibility = View.VISIBLE
+            } else {
+                vItemDone.visibility = View.GONE
+            }
         }
 
         private fun prepareCheckListener() {
-            val item = getItem(adapterPosition) as? TodoItem
-            item?.let { item ->
-                cbChecked.setOnCheckedChangeListener { btn, isCheked ->
+            itemView.setOnClickListener { v ->
+                (getItem(adapterPosition) as? TodoItemViewModel)?.let { item ->
                     todoCallback.get()?.setDone(item)
                 }
             }
         }
     }
 
-    inner class SectionViewHolder(itemView: View) : BaseViewHolder<SectionTodoItem>(itemView) {
+    inner class SectionViewHolder(itemView: View) : BaseViewHolder<SectionTodoItemViewModel>(itemView) {
         val ivExpandState = itemView.findViewById<ImageView>(R.id.ivExpandState)
         val tvTitle = itemView.findViewById<TextView>(R.id.tvTitle)
 
         init {
             itemView.setOnClickListener {
-                val item = getItem(adapterPosition) as? SectionTodoItem
-                item?.let {
+                (getItem(adapterPosition) as? SectionTodoItemViewModel)?.let {
                     todoCallback.get()?.switchExpandState(it)
                 }
             }
         }
 
-        fun bind(item: SectionTodoItem) {
-            tvTitle.text = item.title
+        fun bind(item: SectionTodoItemViewModel) {
+            tvTitle.text = item.section.title
             ivExpandState.rotation = if (item.isExpanded) 225f else 0f
         }
 

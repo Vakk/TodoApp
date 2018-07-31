@@ -1,59 +1,64 @@
 package com.valery.todo.ui.screens.todos
 
 import android.arch.lifecycle.MutableLiveData
+import com.valery.todo.model.db.Todo
+import com.valery.todo.model.db.TodoSection
 import com.valery.todo.ui.base.BaseViewModel
-import com.valery.todo.ui.screens.todos.item.BaseTodoItem
-import com.valery.todo.ui.screens.todos.item.SectionTodoItem
-import com.valery.todo.ui.screens.todos.item.TodoItem
+import com.valery.todo.ui.screens.todos.item.BaseTodoItemViewModel
+import com.valery.todo.ui.screens.todos.item.SectionTodoItemViewModel
+import com.valery.todo.ui.screens.todos.item.TodoItemViewModel
 import com.valery.todo.utils.extensions.default
+import java.util.*
 
 class TodosViewModel : BaseViewModel() {
-    val itemsLiveData: MutableLiveData<MutableList<BaseTodoItem>> = MutableLiveData<MutableList<BaseTodoItem>>().default(mutableListOf())
+    val itemsLiveData: MutableLiveData<MutableList<BaseTodoItemViewModel>> = MutableLiveData<MutableList<BaseTodoItemViewModel>>().default(mutableListOf())
 
-    var sections: MutableList<SectionTodoItem> = mutableListOf()
-    var items: MutableList<TodoItem> = mutableListOf()
+    var sections: MutableList<SectionTodoItemViewModel> = mutableListOf()
+    var itemViewModels: MutableList<TodoItemViewModel> = mutableListOf()
 
     private var lastValue: Int = 0
 
     init {
-        sections.add(SectionTodoItem(lastValue++.toLong(), "Done", true) { it.isDone })
-        sections.add(SectionTodoItem(lastValue++.toLong(), "Undone", true) { !it.isDone })
-    }
-
-    fun addValue(checked: Boolean, title: String) {
-        items.add(TodoItem(lastValue++.toLong(), checked, title))
+        sections.add(SectionTodoItemViewModel(TodoSection(lastValue++.toLong(), "Shopping", 0), true))
+        sections.add(SectionTodoItemViewModel(TodoSection(lastValue++.toLong(), "Work", 1), true))
         loadToView()
     }
 
-    fun removeValue(todoItem: TodoItem) {
-        items.remove(todoItem)
+    fun addValue(done: Boolean, title: String) {
+        itemViewModels.add(TodoItemViewModel(Todo(lastValue++.toLong(), title, done, Random().nextInt(2))))
         loadToView()
     }
 
-    fun changeStatus(todoItem: TodoItem) {
-        todoItem.isDone = !todoItem.isDone
+    fun removeValue(todoItemViewModel: TodoItemViewModel) {
+        itemViewModels.remove(todoItemViewModel)
+        loadToView()
+    }
+
+    fun changeStatus(todoItemViewModel: TodoItemViewModel) {
+        itemViewModels.firstOrNull { it.id == todoItemViewModel.id }?.item?.isDone = !todoItemViewModel.item.isDone
         loadToView()
     }
 
     fun addValue() {
-        addValue(true, "Check box #$lastValue")
+        addValue(false, "Check box #$lastValue")
     }
 
-    fun expandSection(section: SectionTodoItem) {
+    fun expandSection(section: SectionTodoItemViewModel) {
         sections.firstOrNull { it.id == section.id }?.isExpanded = !section.isExpanded
         loadToView()
     }
 
     private fun loadToView() {
-        val dataToView = mutableListOf<BaseTodoItem>()
+        val dataToView = mutableListOf<BaseTodoItemViewModel>()
         for (section in sections) {
-            dataToView.add(section.copy())
+            dataToView.add(section.copy(section = section.section.copy()))
             if (section.isExpanded) {
-                for (todo in items) {
-                    if (section.validator.invoke(todo)) {
-                        dataToView.add(todo)
-                    }
-                }
+                val todosForSection = itemViewModels
+                        .filter { it.item.sectionType == section.section.type }
+                        .map { it.copy(item = it.item.copy()) }
+                        .sortedBy { it.id }
+                        .sortedBy { it.item.isDone }
+                dataToView.addAll(todosForSection)
             }
         }
         itemsLiveData.postValue(dataToView)
