@@ -8,6 +8,11 @@ import com.valery.todo.ui.screens.todos.item.BaseTodoItemViewModel
 import com.valery.todo.ui.screens.todos.item.EmptyItemViewModel
 import com.valery.todo.ui.screens.todos.item.SectionTodoItemViewModel
 import com.valery.todo.ui.screens.todos.item.TodoItemViewModel
+import io.reactivex.Observable
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
+import io.reactivex.rxkotlin.addTo
+import io.reactivex.schedulers.Schedulers
 import java.util.*
 
 class TodosViewModel : BaseViewModel() {
@@ -18,27 +23,29 @@ class TodosViewModel : BaseViewModel() {
 
     private var lastValue: Int = 0
 
+    private var dataPreparingDisposable: Disposable? = null
+
     init {
         sections.add(SectionTodoItemViewModel(TodoSection(lastValue++.toLong(), "Shopping", 0), true))
         sections.add(SectionTodoItemViewModel(TodoSection(lastValue++.toLong(), "Work", 1), true))
-        loadToView()
+        updateLiveData()
     }
 
     fun addValue(done: Boolean, title: String) {
         itemViewModels.add(TodoItemViewModel(Todo(lastValue++.toLong(), title, done, Random().nextInt(2))))
-        loadToView()
+        updateLiveData()
     }
 
     fun removeValue(todoItemViewModel: TodoItemViewModel) {
         itemViewModels.remove(todoItemViewModel)
-        loadToView()
+        updateLiveData()
     }
 
     fun changeStatus(todoItemViewModel: TodoItemViewModel) {
         itemViewModels.firstOrNull { it.id == todoItemViewModel.id }?.item?.apply {
             isDone = !todoItemViewModel.item.isDone
         }
-        loadToView()
+        updateLiveData()
     }
 
     fun addValue() {
@@ -47,26 +54,33 @@ class TodosViewModel : BaseViewModel() {
 
     fun expandSection(section: SectionTodoItemViewModel) {
         sections.firstOrNull { it.id == section.id }?.isExpanded = !section.isExpanded
-        loadToView()
+        updateLiveData()
     }
 
-    private fun loadToView() {
-        val dataToView = mutableListOf<BaseTodoItemViewModel>()
-        for (section in sections) {
-            dataToView.add(section.copy(section = section.section.copy()))
-            if (section.isExpanded) {
-                val todosForSection = itemViewModels
-                        .filter { it.item.sectionType == section.section.type }
-                        .map { it.copy(item = it.item.copy()) }
-                        .sortedBy { it.id }
-                        .sortedBy { it.item.isDone }
-                if (todosForSection.isNotEmpty()) {
-                    dataToView.addAll(todosForSection)
-                } else {
-                    dataToView.add(EmptyItemViewModel(section.id))
+    private fun updateLiveData() {
+        dataPreparingDisposable?.dispose()
+        val aggregator: MutableList<BaseTodoItemViewModel> = mutableListOf()
+        dataPreparingDisposable = Observable.just(this)
+                .flatMapIterable { sections }
+                .map { section -> section.copy(section = section.section.copy()) }
+                .doOnNext { aggregator.add(it) }
+                .filter { it.isExpanded }
+                .doOnNext { section ->
+                    val todosForSection = itemViewModels
+                            .filter { it.item.sectionType == section.section.type }
+                            .map { it.copy(item = it.item.copy()) }
+                            .sortedBy { it.id }
+                            .sortedBy { it.item.isDone }
+                    if (todosForSection.isNotEmpty()) {
+                        aggregator.addAll(todosForSection)
+                    } else {
+                        aggregator.add(EmptyItemViewModel(section.id, section.id))
+                    }
                 }
-            }
-        }
-        itemsLiveData.postValue(dataToView)
+                .toList()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.computation())
+                .subscribe { dataToView -> itemsLiveData.postValue(aggregator) }
+                .addTo(disposableBag)
     }
 }
