@@ -64,17 +64,20 @@ class TodosViewModel : BaseViewModel() {
                 .flatMapIterable { sections }
                 .map { section -> section.copy(section = section.section.copy()) }
                 .doOnNext { aggregator.add(it) }
-                .filter { it.isExpanded }
                 .doOnNext { section ->
                     val todosForSection = itemViewModels
                             .filter { it.item.sectionType == section.section.type }
                             .map { it.copy(item = it.item.copy()) }
                             .sortedBy { it.id }
                             .sortedBy { it.item.isDone }
-                    if (todosForSection.isNotEmpty()) {
-                        aggregator.addAll(todosForSection)
-                    } else {
-                        aggregator.add(EmptyItemViewModel(section.id, section.id))
+                    section.allCount = todosForSection.size
+                    section.doneCount = todosForSection.count { it.item.isDone }
+                    if (section.isExpanded) {
+                        if (todosForSection.isNotEmpty()) {
+                            aggregator.addAll(todosForSection)
+                        } else {
+                            aggregator.add(EmptyItemViewModel(section.id, section.id))
+                        }
                     }
                 }
                 .toList()

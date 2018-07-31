@@ -115,6 +115,9 @@ class TodosAdapter(todoCallback: TodoCallback?) : BaseAdapter<BaseViewHolder<out
                 if (containsKey(TodoAdapterContract.EXTRA_EXPANDED)) {
                     holder.updateExpandState(item.isExpanded)
                 }
+                if (containsKey(TodoAdapterContract.EXTRA_COUNTER)) {
+                    holder.updateCounter(item.allCount, item.doneCount)
+                }
                 return
             }
         }
@@ -160,6 +163,7 @@ class TodosAdapter(todoCallback: TodoCallback?) : BaseAdapter<BaseViewHolder<out
     inner class SectionViewHolder(itemView: View) : BaseViewHolder<SectionTodoItemViewModel>(itemView) {
         val ivExpandState = itemView.findViewById<ImageView>(R.id.ivExpandState)
         val tvTitle = itemView.findViewById<TextView>(R.id.tvTitle)
+        val tvCounter = itemView.findViewById<TextView>(R.id.tvCounter)
 
         val openAnimator: Animator by lazy {
             AnimatorInflater.loadAnimator(itemView.context, R.animator.animator_toogle_todo_open)
@@ -177,9 +181,10 @@ class TodosAdapter(todoCallback: TodoCallback?) : BaseAdapter<BaseViewHolder<out
             }
         }
 
-        fun bind(item: SectionTodoItemViewModel) {
-            tvTitle.text = item.section.title
-            ivExpandState.rotation = if (item.isExpanded) 225f else 0f
+        fun bind(section: SectionTodoItemViewModel) {
+            tvTitle.text = section.section.title
+            ivExpandState.rotation = if (section.isExpanded) 225f else 0f
+            tvCounter.text = "(${section.doneCount}/${section.allCount})"
         }
 
         fun updateTitle(title: String) {
@@ -196,6 +201,10 @@ class TodosAdapter(todoCallback: TodoCallback?) : BaseAdapter<BaseViewHolder<out
                 closeAnimator.setTarget(ivExpandState)
                 closeAnimator.start()
             }
+        }
+
+        fun updateCounter(itemsCount: Int, doneCount: Int) {
+            tvCounter.text = "($doneCount/$itemsCount)"
         }
 
     }

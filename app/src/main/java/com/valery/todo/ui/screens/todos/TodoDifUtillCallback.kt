@@ -32,7 +32,9 @@ class TodoDifUtillCallback : BaseDiffUtillCallback<BaseTodoItemViewModel>(mutabl
                 return oldItem.item.isDone != newItem.item.isDone && oldItem.item.title != newItem.item.title
             }
             oldItem is SectionTodoItemViewModel && newItem is SectionTodoItemViewModel -> {
-                return oldItem.isExpanded != newItem.isExpanded && oldItem.section.title != newItem.section.title
+                return oldItem.isExpanded != newItem.isExpanded
+                        && oldItem.section.title != newItem.section.title
+                        && oldItem.allCount != newItem.allCount
             }
             else -> false
         }
@@ -55,6 +57,10 @@ class TodoDifUtillCallback : BaseDiffUtillCallback<BaseTodoItemViewModel>(mutabl
             oldItem is SectionTodoItemViewModel && newItem is SectionTodoItemViewModel -> {
                 if (oldItem.isExpanded != newItem.isExpanded) {
                     putBoolean(TodoAdapterContract.EXTRA_EXPANDED, newItem.isExpanded)
+                }
+
+                if (oldItem.allCount != newItem.allCount || oldItem.doneCount != newItem.doneCount) {
+                    putInt(TodoAdapterContract.EXTRA_COUNTER, newItem.allCount)
                 }
 
                 if (oldItem.section.title != newItem.section.title) {
