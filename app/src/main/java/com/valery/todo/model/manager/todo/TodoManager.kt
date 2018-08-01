@@ -1,11 +1,11 @@
-package com.valery.todo.model.manager
+package com.valery.todo.model.manager.todo
 
 import com.valery.todo.model.db.item.Todo
 import com.valery.todo.model.db.todo.ITodoRepository
 import io.reactivex.Maybe
 import io.reactivex.Observable
 
-class TodoManager(val repository: ITodoRepository): Manager<Todo, Long> {
+class TodoManager(val repository: ITodoRepository) : ITodoManager {
 
     override fun save(item: Todo): Observable<Todo> {
         return repository.save(item)
