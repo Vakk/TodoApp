@@ -1,8 +1,8 @@
 package com.valery.todo.ui.screens.todos
 
 import android.arch.lifecycle.MutableLiveData
-import com.valery.todo.model.db.Todo
-import com.valery.todo.model.db.TodoSection
+import com.valery.todo.model.db.item.Todo
+import com.valery.todo.model.db.item.Section
 import com.valery.todo.ui.base.BaseViewModel
 import com.valery.todo.ui.screens.todos.item.BaseTodoItemViewModel
 import com.valery.todo.ui.screens.todos.item.EmptyItemViewModel
@@ -26,8 +26,8 @@ class TodosViewModel : BaseViewModel() {
     private var dataPreparingDisposable: Disposable? = null
 
     init {
-        sections.add(SectionTodoItemViewModel(TodoSection(lastValue++.toLong(), "Shopping", 0), true))
-        sections.add(SectionTodoItemViewModel(TodoSection(lastValue++.toLong(), "Work", 1), true))
+        sections.add(SectionTodoItemViewModel(Section(lastValue++.toLong(), "Shopping", 0), true))
+        sections.add(SectionTodoItemViewModel(Section(lastValue++.toLong(), "Work", 1), true))
         updateLiveData()
     }
 
@@ -64,26 +64,28 @@ class TodosViewModel : BaseViewModel() {
                 .flatMapIterable { sections }
                 .map { section -> section.copy(section = section.section.copy()) }
                 .doOnNext { aggregator.add(it) }
-                .doOnNext { section ->
-                    val todosForSection = itemViewModels
-                            .filter { it.item.sectionType == section.section.type }
-                            .map { it.copy(item = it.item.copy()) }
-                            .sortedBy { it.id }
-                            .sortedBy { it.item.isDone }
-                    section.allCount = todosForSection.size
-                    section.doneCount = todosForSection.count { it.item.isDone }
-                    if (section.isExpanded) {
-                        if (todosForSection.isNotEmpty()) {
-                            aggregator.addAll(todosForSection)
-                        } else {
-                            aggregator.add(EmptyItemViewModel(section.id, section.id))
-                        }
-                    }
-                }
+                .doOnNext { section -> processSectionTodos(aggregator,section) }
                 .toList()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.computation())
                 .subscribe { dataToView -> itemsLiveData.postValue(aggregator) }
                 .addTo(disposableBag)
+    }
+
+    private fun processSectionTodos (aggregator: MutableList<BaseTodoItemViewModel>, section: SectionTodoItemViewModel) {
+        val todosForSection = itemViewModels
+                .filter { it.item.sectionType == section.section.type }
+                .map { it.copy(item = it.item.copy()) }
+                .sortedBy { it.id }
+                .sortedBy { it.item.isDone }
+        section.allCount = todosForSection.size
+        section.doneCount = todosForSection.count { it.item.isDone }
+        if (section.isExpanded) {
+            if (todosForSection.isNotEmpty()) {
+                aggregator.addAll(todosForSection)
+            } else {
+                aggregator.add(EmptyItemViewModel(section.id, section.id))
+            }
+        }
     }
 }

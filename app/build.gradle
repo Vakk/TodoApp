@@ -2,6 +2,7 @@ apply plugin: 'com.android.application'
 
 apply from: "$rootProject.projectDir/gradle/kotlin.gradle"
 apply from: "$rootProject.projectDir/gradle/rx.gradle"
+apply plugin: 'kotlin-kapt'
 
 android {
     compileSdkVersion 27
@@ -25,6 +26,7 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
 
+
     implementation 'com.android.support:support-v4:27.1.1'
     implementation "com.android.support:appcompat-v7:27.1.1"
 
@@ -39,4 +41,8 @@ dependencies {
     implementation 'com.google.dagger:dagger:2.16'
     annotationProcessor 'com.google.dagger:dagger-compiler:2.16'
     implementation 'com.android.support:recyclerview-v7:27.1.1'
+    implementation 'com.android.support:design:27.1.1'
+
+    implementation "android.arch.persistence.room:runtime:1.1.1"
+    kapt "android.arch.persistence.room:compiler:1.1.1"
 }
