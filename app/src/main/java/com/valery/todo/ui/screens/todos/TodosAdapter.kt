@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AccelerateInterpolator
 import android.view.animation.OvershootInterpolator
 import android.widget.ImageView
 import android.widget.TextView
@@ -126,6 +127,19 @@ class TodosAdapter(todoCallback: TodoCallback?) : BaseAdapter<BaseViewHolder<out
     inner class TodoViewHolder(itemView: View) : BaseViewHolder<TodoItemViewModel>(itemView) {
         val tvTitle = itemView.findViewById<TextView>(R.id.tvTitle)
         val vItemDone = itemView.findViewById<View>(R.id.vItemDone)
+        val vCrossedOut = itemView.findViewById<View>(R.id.vCrossedOut)
+        val ivDelete = itemView.findViewById<ImageView>(R.id.ivDelete)
+
+        val rossedOutAnimator = AnimatorInflater.loadAnimator(itemView.context, R.animator.animator_crossed_out)
+        val rossedInAnimator = AnimatorInflater.loadAnimator(itemView.context, R.animator.animator_crossed_in)
+
+        init {
+            ivDelete.setOnClickListener {
+                (getItem(adapterPosition) as? TodoItemViewModel)?.let {
+                    todoCallback.get()?.removeTodo(it)
+                }
+            }
+        }
 
         fun bind(itemViewModel: TodoItemViewModel) {
             prepareCheckListener()
@@ -134,8 +148,10 @@ class TodosAdapter(todoCallback: TodoCallback?) : BaseAdapter<BaseViewHolder<out
 
             if (itemViewModel.item.isDone) {
                 vItemDone.visibility = View.VISIBLE
+                vCrossedOut.visibility = View.VISIBLE
             } else {
                 vItemDone.visibility = View.GONE
+                vCrossedOut.visibility = View.GONE
             }
         }
 
@@ -146,8 +162,15 @@ class TodosAdapter(todoCallback: TodoCallback?) : BaseAdapter<BaseViewHolder<out
         fun updateDoneStatus(isDone: Boolean) {
             if (isDone) {
                 vItemDone.visibility = View.VISIBLE
+                vCrossedOut.visibility = View.VISIBLE
+                rossedOutAnimator.setTarget(vCrossedOut)
+                rossedOutAnimator.interpolator = AccelerateInterpolator()
+                rossedOutAnimator.start()
             } else {
                 vItemDone.visibility = View.GONE
+                rossedInAnimator.setTarget(vCrossedOut)
+                rossedInAnimator.interpolator = AccelerateInterpolator()
+                rossedInAnimator.start()
             }
         }
 
@@ -165,6 +188,7 @@ class TodosAdapter(todoCallback: TodoCallback?) : BaseAdapter<BaseViewHolder<out
         val tvTitle = itemView.findViewById<TextView>(R.id.tvTitle)
         val tvCounter = itemView.findViewById<TextView>(R.id.tvCounter)
         val ivAddItem = itemView.findViewById<ImageView>(R.id.ivAddItem)
+        val ivDelete = itemView.findViewById<ImageView>(R.id.ivDelete)
 
         val openAnimator: Animator by lazy {
             AnimatorInflater.loadAnimator(itemView.context, R.animator.animator_toogle_todo_open)
@@ -183,6 +207,11 @@ class TodosAdapter(todoCallback: TodoCallback?) : BaseAdapter<BaseViewHolder<out
             ivAddItem.setOnClickListener {
                 (getItem(adapterPosition) as? SectionTodoItemViewModel)?.let {
                     todoCallback.get()?.addTodo(it)
+                }
+            }
+            ivDelete.setOnClickListener {
+                (getItem(adapterPosition) as? SectionTodoItemViewModel)?.let {
+                    todoCallback.get()?.removeSection(it)
                 }
             }
         }

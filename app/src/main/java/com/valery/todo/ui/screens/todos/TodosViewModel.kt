@@ -144,4 +144,34 @@ class TodosViewModel : BaseViewModel() {
                 .subscribe({}, { it.printStackTrace() })
                 .addTo(disposableBag)
     }
+
+    fun removeTodo(todo: TodoItemViewModel) {
+        todoManager.remove(todo.id)
+                .doOnNext { todoViewModels.removeAll { it.item.id == todo.id } }
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe({
+                    updateLiveData()
+                }, {
+                    it.printStackTrace()
+                })
+    }
+
+    fun removeSection(section: SectionTodoItemViewModel) {
+        todoManager.getAll()
+                .flatMapIterable { it }
+                .filter { it.sectionType != section.id }
+                .flatMap { todoManager.remove(it.id) }
+                .doOnNext { todoViewModels.removeAll{ it.item.sectionType == section.id} }
+                .toList()
+                .toObservable()
+                .flatMap { sectionManager.remove(section.id) }
+                .doOnNext { sectionsViewModels.removeAll { it.id == section.id } }
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe({
+                    updateLiveData()
+                }, {it.printStackTrace()})
+                .addTo(disposableBag)
+    }
 }

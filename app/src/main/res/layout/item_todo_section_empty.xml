@@ -22,6 +22,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:text="Section is empty" />
+        android:text="@string/lbl_section_empty" />
 
 </android.support.constraint.ConstraintLayout>
