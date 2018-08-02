@@ -7,4 +7,6 @@ interface TodoCallback {
     fun setDone (todoItemViewModel: TodoItemViewModel)
 
     fun switchExpandState (section: SectionTodoItemViewModel)
+
+    fun addTodo (section: SectionTodoItemViewModel)
 }

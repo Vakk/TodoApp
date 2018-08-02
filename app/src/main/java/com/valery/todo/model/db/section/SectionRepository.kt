@@ -1,6 +1,5 @@
 package com.valery.todo.model.db.section
 
-import com.valery.todo.model.db.Repository
 import com.valery.todo.model.db.item.Section
 import io.reactivex.Maybe
 import io.reactivex.Observable
@@ -9,15 +8,19 @@ class SectionRepository(val dao: SectionDao) : ISectionRepository {
 
     override fun save(item: Section): Observable<Section> {
         return Observable.fromCallable {
-            dao.insert(item)
-            item
+            val id = dao.insert(item)[0]
+            get(id).blockingGet()
         }
     }
 
     override fun save(items: List<Section>): Observable<List<Section>> {
         return Observable.fromCallable {
-            dao.insert(*items.toTypedArray())
-            items
+            val result = dao.insert(*items.toTypedArray())
+            val aggregator = mutableListOf<Section>()
+            for (id in result) {
+                aggregator.add(get(id).blockingGet())
+            }
+            return@fromCallable aggregator
         }
     }
 

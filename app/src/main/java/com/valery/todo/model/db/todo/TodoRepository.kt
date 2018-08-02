@@ -8,15 +8,19 @@ class TodoRepository(val dao: TodoDao) : ITodoRepository {
 
     override fun save(item: Todo): Observable<Todo> {
         return Observable.fromCallable {
-            dao.insert(item)
-            item
+            val id = dao.insert(item)[0]
+            get(id).blockingGet()
         }
     }
 
     override fun save(items: List<Todo>): Observable<List<Todo>> {
         return Observable.fromCallable {
-            dao.insert(*items.toTypedArray())
-            items
+            val result = dao.insert(*items.toTypedArray())
+            val aggregator = mutableListOf<Todo>()
+            for (id in result) {
+                aggregator.add(get(id).blockingGet())
+            }
+            return@fromCallable aggregator
         }
     }
 

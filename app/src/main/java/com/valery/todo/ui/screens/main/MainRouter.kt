@@ -1,9 +1,11 @@
 package com.valery.todo.ui.screens.main
 
 interface MainRouter {
-    fun openTodosList()
+    fun goBack()
 
-    fun openCreateTodo()
+    fun openTodosList(putToBackStack: Boolean = false)
 
-    fun openCreateSection()
+    fun openCreateTodo(putToBackStack: Boolean = false)
+
+    fun openCreateSection(putToBackStack: Boolean = false)
 }

@@ -8,11 +8,11 @@ import android.arch.persistence.room.Update
 interface Dao<T> {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insert (vararg item: T)
+    fun insert (vararg item: T): List<Long>
 
     @Delete
-    fun delete (vararg item: T)
+    fun delete (vararg item: T): Int
 
     @Update(onConflict = OnConflictStrategy.REPLACE)
-    fun update (vararg item: T)
+    fun update (vararg item: T): Int
 }
