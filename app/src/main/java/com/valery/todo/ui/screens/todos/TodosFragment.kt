@@ -55,7 +55,7 @@ class TodosFragment : BaseFragment<TodosViewModel>(TodosViewModel::class.java), 
     }
 
     override fun addTodo(section: SectionTodoItemViewModel) {
-        
+        viewModel?.addTodo(section)
     }
 
     private fun prepareSubscriptions() {
@@ -79,6 +79,11 @@ class TodosFragment : BaseFragment<TodosViewModel>(TodosViewModel::class.java), 
     override fun onShowSuccess(data: Any?) {
         pbLoading.hide(true)
         rvTodos.show()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        viewModel?.save()
     }
 
     private fun prepareAdapter() {
