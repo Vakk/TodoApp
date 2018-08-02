@@ -28,6 +28,7 @@ class TodosFragment : BaseFragment<TodosViewModel>(TodosViewModel::class.java), 
         btnAddTodo.setOnClickListener {
             viewModel?.addValue()
         }
+        viewModel?.load()
     }
 
     override fun setDone(todoItemViewModel: TodoItemViewModel) {
@@ -40,6 +41,11 @@ class TodosFragment : BaseFragment<TodosViewModel>(TodosViewModel::class.java), 
 
     override fun switchExpandState(section: SectionTodoItemViewModel) {
         viewModel?.expandSection(section)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        viewModel?.save()
     }
 
     private fun prepareAdapter () {

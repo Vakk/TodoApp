@@ -1,5 +1,6 @@
 package com.valery.todo.dagger.modules
 
+import com.valery.todo.dagger.SessionScope
 import com.valery.todo.model.db.section.SectionRepository
 import com.valery.todo.model.db.todo.ITodoRepository
 import com.valery.todo.model.manager.section.ISectionManager
@@ -14,11 +15,11 @@ import javax.inject.Singleton
 class ManagerModule {
 
     @Provides
-    @Singleton
+    @SessionScope
     fun provideTodoManager(todoRepository: ITodoRepository): ITodoManager = TodoManager(todoRepository)
 
     @Provides
-    @Singleton
+    @SessionScope
     fun provideSectionManager(sectionRepository: SectionRepository): ISectionManager = SectionManager(sectionRepository)
 
 }
