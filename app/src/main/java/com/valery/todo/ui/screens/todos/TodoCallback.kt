@@ -9,4 +9,8 @@ interface TodoCallback {
     fun switchExpandState (section: SectionTodoItemViewModel)
 
     fun addTodo (section: SectionTodoItemViewModel)
+
+    fun removeTodo (todo: TodoItemViewModel)
+
+    fun removeSection (seciton: SectionTodoItemViewModel)
 }

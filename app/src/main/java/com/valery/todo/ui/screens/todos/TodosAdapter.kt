@@ -126,6 +126,16 @@ class TodosAdapter(todoCallback: TodoCallback?) : BaseAdapter<BaseViewHolder<out
     inner class TodoViewHolder(itemView: View) : BaseViewHolder<TodoItemViewModel>(itemView) {
         val tvTitle = itemView.findViewById<TextView>(R.id.tvTitle)
         val vItemDone = itemView.findViewById<View>(R.id.vItemDone)
+        val vCrossedOut = itemView.findViewById<View>(R.id.vCrossedOut)
+        val ivDelete = itemView.findViewById<ImageView>(R.id.ivDelete)
+
+        init {
+            ivDelete.setOnClickListener {
+                (getItem(adapterPosition) as? TodoItemViewModel)?.let {
+                    todoCallback.get()?.removeTodo(it)
+                }
+            }
+        }
 
         fun bind(itemViewModel: TodoItemViewModel) {
             prepareCheckListener()
@@ -134,8 +144,10 @@ class TodosAdapter(todoCallback: TodoCallback?) : BaseAdapter<BaseViewHolder<out
 
             if (itemViewModel.item.isDone) {
                 vItemDone.visibility = View.VISIBLE
+                vCrossedOut.visibility = View.VISIBLE
             } else {
                 vItemDone.visibility = View.GONE
+                vCrossedOut.visibility = View.GONE
             }
         }
 
@@ -146,8 +158,10 @@ class TodosAdapter(todoCallback: TodoCallback?) : BaseAdapter<BaseViewHolder<out
         fun updateDoneStatus(isDone: Boolean) {
             if (isDone) {
                 vItemDone.visibility = View.VISIBLE
+                vCrossedOut.visibility = View.VISIBLE
             } else {
                 vItemDone.visibility = View.GONE
+                vCrossedOut.visibility = View.GONE
             }
         }
 

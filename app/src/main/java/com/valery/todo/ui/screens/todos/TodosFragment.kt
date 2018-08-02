@@ -58,6 +58,15 @@ class TodosFragment : BaseFragment<TodosViewModel>(TodosViewModel::class.java), 
         viewModel?.addTodo(section)
     }
 
+    override fun removeTodo(todo: TodoItemViewModel) {
+        viewModel?.removeTodo(todo)
+    }
+
+    override fun removeSection(section: SectionTodoItemViewModel) {
+        viewModel?.removeSection(section)
+    }
+
+
     private fun prepareSubscriptions() {
         viewModel?.itemsLiveData?.observe(this, Observer { items ->
             items?.let {
