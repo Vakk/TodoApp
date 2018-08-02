@@ -9,6 +9,8 @@ import com.valery.todo.R
 import com.valery.todo.ui.base.BaseFragment
 import com.valery.todo.ui.screens.todos.item.SectionTodoItemViewModel
 import com.valery.todo.ui.screens.todos.item.TodoItemViewModel
+import com.valery.todo.utils.extensions.hide
+import com.valery.todo.utils.extensions.show
 import kotlinx.android.synthetic.main.fragment_todos.*
 
 class TodosFragment : BaseFragment<TodosViewModel>(TodosViewModel::class.java), TodoCallback {
@@ -20,14 +22,7 @@ class TodosFragment : BaseFragment<TodosViewModel>(TodosViewModel::class.java), 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         prepareAdapter()
-        viewModel?.itemsLiveData?.observe(this, Observer { items ->
-            items?.let {
-                adapter?.updateListItems(it, TodoDifUtillCallback() )
-            }
-        })
-        btnAddTodo.setOnClickListener {
-            viewModel?.addValue()
-        }
+        prepareSubscriptions()
         viewModel?.load()
     }
 
@@ -43,12 +38,30 @@ class TodosFragment : BaseFragment<TodosViewModel>(TodosViewModel::class.java), 
         viewModel?.expandSection(section)
     }
 
-    override fun onPause() {
-        super.onPause()
-        viewModel?.save()
+    private fun prepareSubscriptions() {
+        viewModel?.itemsLiveData?.observe(this, Observer { items ->
+            items?.let {
+                adapter?.updateListItems(it, TodoDifUtillCallback())
+                if (items.size == 0 ) {
+                    tvSectionsNotFound.show()
+                } else {
+                    tvSectionsNotFound.hide(true)
+                }
+            }
+        })
     }
 
-    private fun prepareAdapter () {
+    override fun showProgress(data: Any?) {
+        pbLoading.show()
+        rvTodos.hide(true)
+    }
+
+    override fun showSuccess(data: Any?) {
+        pbLoading.hide(true)
+        rvTodos.show()
+    }
+
+    private fun prepareAdapter() {
         adapter = TodosAdapter(this)
         rvTodos.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
         rvTodos.adapter = adapter

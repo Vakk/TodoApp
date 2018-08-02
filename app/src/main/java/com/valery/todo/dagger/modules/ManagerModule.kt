@@ -1,6 +1,7 @@
 package com.valery.todo.dagger.modules
 
 import com.valery.todo.dagger.SessionScope
+import com.valery.todo.model.db.section.ISectionRepository
 import com.valery.todo.model.db.section.SectionRepository
 import com.valery.todo.model.db.todo.ITodoRepository
 import com.valery.todo.model.manager.section.ISectionManager
@@ -20,6 +21,6 @@ class ManagerModule {
 
     @Provides
     @SessionScope
-    fun provideSectionManager(sectionRepository: SectionRepository): ISectionManager = SectionManager(sectionRepository)
+    fun provideSectionManager(sectionRepository: ISectionRepository): ISectionManager = SectionManager(sectionRepository)
 
 }

@@ -4,7 +4,9 @@ import android.arch.lifecycle.MutableLiveData
 import com.valery.todo.TodoApp
 import com.valery.todo.model.db.item.Section
 import com.valery.todo.model.db.item.Todo
+import com.valery.todo.model.manager.section.ISectionManager
 import com.valery.todo.model.manager.todo.ITodoManager
+import com.valery.todo.ui.DataStatus
 import com.valery.todo.ui.base.BaseViewModel
 import com.valery.todo.ui.screens.todos.item.BaseTodoItemViewModel
 import com.valery.todo.ui.screens.todos.item.EmptyItemViewModel
@@ -15,7 +17,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.schedulers.Schedulers
-import java.util.*
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class TodosViewModel : BaseViewModel() {
@@ -27,7 +29,8 @@ class TodosViewModel : BaseViewModel() {
     @Inject
     lateinit var todoManager: ITodoManager
 
-    private var lastValue: Int = 0
+    @Inject
+    lateinit var sectionManager: ISectionManager
 
     private var dataPreparingDisposable: Disposable? = null
 
@@ -35,13 +38,11 @@ class TodosViewModel : BaseViewModel() {
 
     init {
         TodoApp.instance.daggerManger.viewModelComponent?.inject(this)
-        sections.add(SectionTodoItemViewModel(Section(lastValue++.toLong(), "Shopping", 0), true))
-        sections.add(SectionTodoItemViewModel(Section(lastValue++.toLong(), "Work", 1), true))
         updateLiveData()
     }
 
     fun addValue(done: Boolean, title: String) {
-        itemViewModels.add(TodoItemViewModel(Todo(lastValue++.toLong(), title, done, Random().nextInt(2))))
+        todoManager.save(Todo(0, title, false, 0))
         updateLiveData()
     }
 
@@ -57,32 +58,18 @@ class TodosViewModel : BaseViewModel() {
         updateLiveData()
     }
 
-    fun addValue() {
-        addValue(false, "Check box #$lastValue")
-    }
-
-    fun save() {
-        todoManager.save(itemViewModels.map { it.item })
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io())
-                .subscribe ({
-
-                }, {
-                    it.printStackTrace()
-                })
-                .addTo(disposableBag)
-    }
-
     fun load() {
         if (isFirstLoading) {
+            dataStatusLiveData.postValue(DataStatus(DataStatus.TypeEnum.LOADING))
             todoManager.getAll()
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeOn(Schedulers.io())
                     .subscribe({
+                        dataStatusLiveData.postValue(DataStatus(DataStatus.TypeEnum.SUCCESS))
                         itemViewModels = it.map { TodoItemViewModel(it) }.toMutableList()
                         updateLiveData()
                     }, {
-                        it.printStackTrace()
+                        dataStatusLiveData.postValue(DataStatus(DataStatus.TypeEnum.ERROR))
                     })
                     .addTo(disposableBag)
         }
