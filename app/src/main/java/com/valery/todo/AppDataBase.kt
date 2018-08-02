@@ -26,6 +26,7 @@ abstract class AppDatabase : RoomDatabase() {
         fun getAppDatabase(context: Context): AppDatabase {
             if (INSTANCE == null) {
                 INSTANCE = Room.databaseBuilder(context.applicationContext, AppDatabase::class.java, context.packageName)
+                        .fallbackToDestructiveMigration()
                         .build()
             }
             return INSTANCE as AppDatabase

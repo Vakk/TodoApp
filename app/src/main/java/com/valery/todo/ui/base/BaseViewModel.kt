@@ -16,7 +16,7 @@ abstract class BaseViewModel : ViewModel(), com.valery.todo.ui.base.ViewModel {
 
     protected val disposableBag = CompositeDisposable()
     open val dataStatusLiveData = MutableLiveData<DataStatus>().default(DataStatus(DataStatus.TypeEnum.LOADING))
-
+    protected val daggerManager = TodoApp.instance.daggerManger
 
     override fun onCleared() {
         super.onCleared()

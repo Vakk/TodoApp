@@ -8,5 +8,5 @@ data class Todo(
         @PrimaryKey(autoGenerate = true) var id: Long,
         var title: String,
         var isDone: Boolean,
-        var sectionType: Int
+        var sectionType: Long
 )

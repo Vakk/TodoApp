@@ -11,13 +11,25 @@
 
     <ImageView
         android:id="@+id/ivExpandState"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
         android:layout_marginBottom="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginTop="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@android:drawable/ic_menu_more" />
+
+    <ImageView
+        android:id="@+id/ivAddItem"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/ivExpandState"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@android:drawable/ic_input_add" />
 
@@ -47,7 +59,7 @@
         android:lines="1"
         android:maxLines="1"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/ivExpandState"
+        app:layout_constraintEnd_toStartOf="@+id/ivAddItem"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="(34/42)" />
 

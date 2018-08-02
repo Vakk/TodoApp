@@ -1,7 +1,6 @@
 package com.valery.todo.ui.screens.todos
 
 import android.arch.lifecycle.MutableLiveData
-import com.valery.todo.TodoApp
 import com.valery.todo.model.db.item.Section
 import com.valery.todo.model.db.item.Todo
 import com.valery.todo.model.manager.section.ISectionManager
@@ -17,7 +16,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.schedulers.Schedulers
-import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class TodosViewModel : BaseViewModel() {
@@ -37,7 +35,7 @@ class TodosViewModel : BaseViewModel() {
     private var isFirstLoading = true
 
     init {
-        TodoApp.instance.daggerManger.viewModelComponent?.inject(this)
+        daggerManager.viewModelComponent?.inject(this)
         updateLiveData()
     }
 
@@ -49,6 +47,23 @@ class TodosViewModel : BaseViewModel() {
     fun removeValue(todoItemViewModel: TodoItemViewModel) {
         itemViewModels.remove(todoItemViewModel)
         updateLiveData()
+    }
+
+    fun addSection(name: String) {
+        sectionManager.save(Section(title = name, id = 0))
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe({
+                    sections.add(SectionTodoItemViewModel(it, false))
+                    updateLiveData()
+                }, {
+                    it.printStackTrace()
+                })
+                .addTo(disposableBag)
+    }
+
+    fun addSection() {
+        addSection("Section")
     }
 
     fun changeStatus(todoItemViewModel: TodoItemViewModel) {
@@ -98,7 +113,7 @@ class TodosViewModel : BaseViewModel() {
 
     private fun processSectionTodos(aggregator: MutableList<BaseTodoItemViewModel>, section: SectionTodoItemViewModel) {
         val todosForSection = itemViewModels
-                .filter { it.item.sectionType == section.section.type }
+                .filter { it.item.sectionType == section.section.id }
                 .map { it.copy(item = it.item.copy()) }
                 .sortedBy { it.id }
                 .sortedBy { it.item.isDone }

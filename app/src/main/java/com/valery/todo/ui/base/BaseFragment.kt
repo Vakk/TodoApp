@@ -31,9 +31,9 @@ abstract class BaseFragment<ViewModel: BaseViewModel>(private val viewModelClass
         viewModel?.dataStatusLiveData?.observe(this, Observer {
             it?.let {
                 when (it.status) {
-                    DataStatus.TypeEnum.LOADING -> showProgress(it.data)
-                    DataStatus.TypeEnum.ERROR -> showError(it.data)
-                    DataStatus.TypeEnum.SUCCESS -> showSuccess(it.data)
+                    DataStatus.TypeEnum.LOADING -> onShowProgress(it.data)
+                    DataStatus.TypeEnum.ERROR -> onShowError(it.data)
+                    DataStatus.TypeEnum.SUCCESS -> onShowSuccess(it.data)
                 }
             }
         })
@@ -48,15 +48,15 @@ abstract class BaseFragment<ViewModel: BaseViewModel>(private val viewModelClass
         viewModel?.dataStatusLiveData?.removeObservers (this)
     }
 
-    protected open fun showProgress (data: Any?) {
+    protected open fun onShowProgress (data: Any?) {
 
     }
 
-    protected open fun showSuccess (data: Any?) {
+    protected open fun onShowSuccess (data: Any?) {
 
     }
 
-    protected open fun showError (data: Any?) {
+    protected open fun onShowError (data: Any?) {
         safeLet(view, data) { view, data ->
             Snackbar.make(view, data.toString(), Snackbar.LENGTH_SHORT).show()
         }
