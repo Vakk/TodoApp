@@ -166,6 +166,7 @@ class TodosViewModel : BaseViewModel() {
                 .toList()
                 .toObservable()
                 .flatMap { sectionManager.remove(section.id) }
+                .doOnNext { sectionsViewModels.removeAll { it.id == section.id } }
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
                 .subscribe({

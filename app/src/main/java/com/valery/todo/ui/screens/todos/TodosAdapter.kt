@@ -179,6 +179,7 @@ class TodosAdapter(todoCallback: TodoCallback?) : BaseAdapter<BaseViewHolder<out
         val tvTitle = itemView.findViewById<TextView>(R.id.tvTitle)
         val tvCounter = itemView.findViewById<TextView>(R.id.tvCounter)
         val ivAddItem = itemView.findViewById<ImageView>(R.id.ivAddItem)
+        val ivDelete = itemView.findViewById<ImageView>(R.id.ivDelete)
 
         val openAnimator: Animator by lazy {
             AnimatorInflater.loadAnimator(itemView.context, R.animator.animator_toogle_todo_open)
@@ -197,6 +198,11 @@ class TodosAdapter(todoCallback: TodoCallback?) : BaseAdapter<BaseViewHolder<out
             ivAddItem.setOnClickListener {
                 (getItem(adapterPosition) as? SectionTodoItemViewModel)?.let {
                     todoCallback.get()?.addTodo(it)
+                }
+            }
+            ivDelete.setOnClickListener {
+                (getItem(adapterPosition) as? SectionTodoItemViewModel)?.let {
+                    todoCallback.get()?.removeSection(it)
                 }
             }
         }

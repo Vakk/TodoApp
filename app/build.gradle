@@ -2,6 +2,7 @@ apply plugin: 'com.android.application'
 
 apply from: "$rootProject.projectDir/gradle/kotlin.gradle"
 apply from: "$rootProject.projectDir/gradle/rx.gradle"
+apply from: "$rootProject.projectDir/gradle/git.gradle"
 apply plugin: 'kotlin-kapt'
 
 android {
@@ -10,8 +11,8 @@ android {
         applicationId "com.valery.todo"
         minSdkVersion 21
         targetSdkVersion 27
-        versionCode 1
-        versionName "1.0"
+        versionCode getGitVersionCode()
+        versionName getGitVersionName()
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {

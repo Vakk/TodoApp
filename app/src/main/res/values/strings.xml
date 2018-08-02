@@ -1,3 +1,7 @@
 <resources>
-    <string name="app_name">todo</string>
+    <string name="app_name">T2do</string>
+    
+    <string name="lbl_section_empty">Section is empty.</string>
+    <string name="lbl_sections_empty">Sections is empty.</string>
+    <string name="btn_add_section">Add section</string>
 </resources>
