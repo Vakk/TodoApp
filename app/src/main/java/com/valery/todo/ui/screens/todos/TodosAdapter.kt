@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AccelerateInterpolator
 import android.view.animation.OvershootInterpolator
 import android.widget.ImageView
 import android.widget.TextView
@@ -129,6 +130,9 @@ class TodosAdapter(todoCallback: TodoCallback?) : BaseAdapter<BaseViewHolder<out
         val vCrossedOut = itemView.findViewById<View>(R.id.vCrossedOut)
         val ivDelete = itemView.findViewById<ImageView>(R.id.ivDelete)
 
+        val rossedOutAnimator = AnimatorInflater.loadAnimator(itemView.context, R.animator.animator_crossed_out)
+        val rossedInAnimator = AnimatorInflater.loadAnimator(itemView.context, R.animator.animator_crossed_in)
+
         init {
             ivDelete.setOnClickListener {
                 (getItem(adapterPosition) as? TodoItemViewModel)?.let {
@@ -159,9 +163,14 @@ class TodosAdapter(todoCallback: TodoCallback?) : BaseAdapter<BaseViewHolder<out
             if (isDone) {
                 vItemDone.visibility = View.VISIBLE
                 vCrossedOut.visibility = View.VISIBLE
+                rossedOutAnimator.setTarget(vCrossedOut)
+                rossedOutAnimator.interpolator = AccelerateInterpolator()
+                rossedOutAnimator.start()
             } else {
                 vItemDone.visibility = View.GONE
-                vCrossedOut.visibility = View.GONE
+                rossedInAnimator.setTarget(vCrossedOut)
+                rossedInAnimator.interpolator = AccelerateInterpolator()
+                rossedInAnimator.start()
             }
         }
 
